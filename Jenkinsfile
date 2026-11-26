@@ -15,20 +15,27 @@ pipeline {
 
         stage('2. Application Build & Test') {
             steps {
-                bat 'C:\\Users\\VVCE\\AppData\\Local\\Programs\\Python\\Python311\\python.exe app.py'
+                bat '''
+                    python --version
+                    python app.py
+                '''
             }
         }
 
         stage('3. Build & Tag Docker Image') {
             steps {
-                bat "docker build -t ${REGISTRY}/${IMAGE_NAME}:${BUILD_NUMBER} -t ${REGISTRY}/${IMAGE_NAME}:latest ."
+                bat """
+                    docker build -t ${REGISTRY}/${IMAGE_NAME}:${BUILD_NUMBER} -t ${REGISTRY}/${IMAGE_NAME}:latest .
+                """
             }
         }
 
         stage('4. Push Image to Registry') {
             steps {
-                bat "docker push ${REGISTRY}/${IMAGE_NAME}:${BUILD_NUMBER}"
-                bat "docker push ${REGISTRY}/${IMAGE_NAME}:latest"
+                bat """
+                    docker push ${REGISTRY}/${IMAGE_NAME}:${BUILD_NUMBER}
+                    docker push ${REGISTRY}/${IMAGE_NAME}:latest
+                """
             }
         }
     }
@@ -36,6 +43,10 @@ pipeline {
     post {
         success {
             echo "Pipeline succeeded! Image ${REGISTRY}/${IMAGE_NAME}:${BUILD_NUMBER} is available locally and in the registry."
+        }
+
+        failure {
+            echo "Pipeline failed! Please check the Jenkins console output."
         }
     }
 }
